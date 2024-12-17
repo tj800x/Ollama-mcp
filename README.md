@@ -61,7 +61,7 @@ Windows: `%APPDATA%/Claude/claude_desktop_config.json`
       "command": "node",
       "args": ["/path/to/ollama-server/build/index.js"],
       "env": {
-        "OLLAMA_HOST": "http://localhost:11434"  // Optional: customize Ollama API endpoint
+        "OLLAMA_HOST": "http://127.0.0.1:11434"  // Optional: customize Ollama API endpoint
       }
     }
   }
@@ -128,7 +128,7 @@ await mcp.use_mcp_tool({
 
 ## 🔧 Advanced Configuration
 
-- `OLLAMA_HOST`: Configure custom Ollama API endpoint (default: http://localhost:11434)
+- `OLLAMA_HOST`: Configure custom Ollama API endpoint (default: http://127.0.0.1:11434)
 - Timeout settings for model execution (default: 60 seconds)
 - Temperature control for response randomness (0-2 range)
 

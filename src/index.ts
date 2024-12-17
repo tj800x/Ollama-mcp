@@ -14,7 +14,7 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 // Default Ollama API endpoint
-const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
 const DEFAULT_TIMEOUT = 60000; // 60 seconds default timeout
 
 interface OllamaGenerateResponse {
