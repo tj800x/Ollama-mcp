@@ -15,6 +15,7 @@ const execAsync = promisify(exec);
 
 // Default Ollama API endpoint
 const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const DEFAULT_TIMEOUT = 60000; // 60 seconds default timeout
 
 interface OllamaGenerateResponse {
   model: string;
@@ -116,6 +117,11 @@ class OllamaServer {
               prompt: {
                 type: 'string',
                 description: 'Prompt to send to the model',
+              },
+              timeout: {
+                type: 'number',
+                description: 'Timeout in milliseconds (default: 60000)',
+                minimum: 1000,
               },
             },
             required: ['name', 'prompt'],
@@ -228,6 +234,11 @@ class OllamaServer {
                 minimum: 0,
                 maximum: 2,
               },
+              timeout: {
+                type: 'number',
+                description: 'Timeout in milliseconds (default: 60000)',
+                minimum: 1000,
+              },
             },
             required: ['model', 'messages'],
             additionalProperties: false,
@@ -325,16 +336,35 @@ class OllamaServer {
 
   private async handleRun(args: any) {
     try {
-      const { stdout, stderr } = await execAsync(`ollama run ${args.name} "${args.prompt}"`);
+      // Use the HTTP API instead of CLI for better control
+      const response = await axios.post<OllamaGenerateResponse>(
+        `${OLLAMA_HOST}/api/generate`,
+        {
+          model: args.name,
+          prompt: args.prompt,
+          stream: false,
+          raw: true, // Add raw mode for more direct responses
+        },
+        {
+          timeout: args.timeout || DEFAULT_TIMEOUT,
+        }
+      );
+
       return {
         content: [
           {
             type: 'text',
-            text: stdout || stderr,
+            text: response.data.response,
           },
         ],
       };
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new McpError(
+          ErrorCode.InternalError,
+          `Ollama API error: ${error.response?.data?.error || error.message}`
+        );
+      }
       throw new McpError(ErrorCode.InternalError, `Failed to run model: ${formatError(error)}`);
     }
   }
@@ -437,7 +467,7 @@ class OllamaServer {
         })
         .join('');
 
-      // Make request to Ollama API
+      // Make request to Ollama API with configurable timeout and raw mode
       const response = await axios.post<OllamaGenerateResponse>(
         `${OLLAMA_HOST}/api/generate`,
         {
@@ -445,6 +475,10 @@ class OllamaServer {
           prompt,
           stream: false,
           temperature: args.temperature,
+          raw: true, // Add raw mode for more direct responses
+        },
+        {
+          timeout: args.timeout || DEFAULT_TIMEOUT,
         }
       );
 
