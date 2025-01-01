@@ -11,6 +11,8 @@ import {
 import axios from 'axios';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
 
 const execAsync = promisify(exec);
 
@@ -337,25 +339,41 @@ class OllamaServer {
 
   private async handleRun(args: any) {
     try {
-      // Use the HTTP API instead of CLI for better control
-      const response = await axios.post<OllamaGenerateResponse>(
+      // Use streaming mode with SSE
+      const response = await axios.post(
         `${OLLAMA_HOST}/api/generate`,
         {
           model: args.name,
           prompt: args.prompt,
-          stream: false,
-          raw: true, // Add raw mode for more direct responses
+          stream: true,
         },
         {
           timeout: args.timeout || DEFAULT_TIMEOUT,
+          responseType: 'stream'
         }
       );
+
+      // Create a transform stream to process the SSE events
+      const transformStream = new TransformStream({
+        transform(chunk, controller) {
+          try {
+            const data = chunk.toString();
+            const json = JSON.parse(data);
+            controller.enqueue(json.response);
+          } catch (error) {
+            controller.error(new McpError(
+              ErrorCode.InternalError,
+              `Error processing stream: ${formatError(error)}`
+            ));
+          }
+        }
+      });
 
       return {
         content: [
           {
-            type: 'text',
-            text: response.data.response,
+            type: 'stream',
+            stream: response.data.pipeThrough(transformStream),
           },
         ],
       };
@@ -519,7 +537,6 @@ class OllamaServer {
 
   async run() {
     // Create HTTP server for SSE transport
-    const http = require('http');
     const server = http.createServer();
     
     // Create stdio transport
@@ -538,7 +555,8 @@ class OllamaServer {
     
     // Start HTTP server
     server.listen(0, () => {
-      console.error(`Ollama MCP server running on stdio and SSE (http://localhost:${server.address().port})`);
+      const address = server.address() as AddressInfo;
+      console.error(`Ollama MCP server running on stdio and SSE (http://localhost:${address.port})`);
     });
   }
 }
