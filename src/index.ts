@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   CallToolRequestSchema,
   ErrorCode,
@@ -517,9 +518,28 @@ class OllamaServer {
   }
 
   async run() {
-    const transport = new StdioServerTransport();
-    await this.server.connect(transport);
-    console.error('Ollama MCP server running on stdio');
+    // Create HTTP server for SSE transport
+    const http = require('http');
+    const server = http.createServer();
+    
+    // Create stdio transport
+    const stdioTransport = new StdioServerTransport();
+    
+    // Connect stdio transport
+    await this.server.connect(stdioTransport);
+    
+    // Setup SSE endpoint
+    server.on('request', (req: import('http').IncomingMessage, res: import('http').ServerResponse) => {
+      if (req.url === '/message') {
+        const sseTransport = new SSEServerTransport(req.url || '/message', res);
+        this.server.connect(sseTransport);
+      }
+    });
+    
+    // Start HTTP server
+    server.listen(0, () => {
+      console.error(`Ollama MCP server running on stdio and SSE (http://localhost:${server.address().port})`);
+    });
   }
 }
 
