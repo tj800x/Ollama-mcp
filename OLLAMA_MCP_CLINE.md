@@ -88,6 +88,13 @@ This document details the setup, testing, and performance results of the Ollama 
 - **Example Output**: Successfully returns both a final answer and a detailed "thinking" block when prompted.
 - **Cline Integration**: Excellent - the best choice for tasks requiring observable reasoning without the long wait times of larger models.
 
+#### 7. **qwen3:1.7b** - Reasoning Specialist (with token limits)
+- **Response Time**: Moderate (dependent on `num_predict`)
+- **Quality**: Good reasoning capabilities.
+- **Use Cases**: Reasoning tasks where a limited-length response is acceptable.
+- **Example Output**: Successfully returns a thinking block but may time out without `num_predict`.
+- **Cline Integration**: Good, but requires using `num_predict` to ensure timely responses.
+
 ### ⚠️ Models with Issues
 
 #### Timeout Issues (Model Loading Time)
@@ -197,14 +204,18 @@ After starting or restarting the Ollama MCP server, it is recommended to perform
 5. **For Simple Math/Chat**: Use `qwen2.5:latest`
 
 ### Timeout Management
-- Set timeout to 120000ms (2 minutes) for reliable models
-- Avoid complex prompts with larger models
-- Use simpler, more direct questions for better response times
+- Set timeout to 120000ms (2 minutes) for reliable models.
+- Avoid complex prompts with larger models.
+- Use simpler, more direct questions for better response times.
+- For models that are slow to generate responses, use the `num_predict` parameter to limit the output length and prevent timeouts.
 
 ### Temperature Settings
 - **Coding**: 0.3-0.5 (more deterministic)
 - **Creative**: 0.7-0.8 (more varied)
 - **Technical**: 0.4-0.6 (balanced)
+
+### Controlling Output Length
+You can control the maximum number of tokens in a response by using the `num_predict` parameter. This is useful for generating shorter, more concise answers or for preventing overly long responses. Setting `num_predict` to `-1` will generate tokens until the context is full.
 
 ## Usage Examples
 
@@ -222,7 +233,8 @@ This example shows a standard request. To control reasoning, add the `think` par
   ],
   "temperature": 0.7,
   "timeout": 120000,
-  "think": false // Set to true for models that support it
+  "think": false, // Set to true for models that support it
+  "num_predict": 50 // Optional: Set the max number of tokens
 }
 ```
 
