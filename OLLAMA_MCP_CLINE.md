@@ -160,6 +160,27 @@ Models like `gemma3:1b` and `qwen2.5-coder:1.5b` do not have this logic in their
 
 ## Best Practices for Cline Usage
 
+### Server and Model Verification
+After starting or restarting the Ollama MCP server, it is recommended to perform a quick verification to ensure everything is working correctly.
+
+1.  **Check Server Health**: Use the `list` tool to confirm the server is responsive and to see the available models.
+    ```json
+    {
+      "tool": "list"
+    }
+    ```
+2.  **Confirm Basic Model Functionality**: Run a simple test with a known reliable model like `gemma3:1b` to ensure inference is working.
+    ```json
+    {
+      "tool": "chat_completion",
+      "model": "gemma3:1b",
+      "messages": [
+        { "role": "user", "content": "Hello. Just reply 'hi'." }
+      ]
+    }
+    ```
+3.  **Investigate Model Capabilities**: Do not assume a model supports advanced features like thinking. Use the `show` tool with various flags (`--template`, `--parameters`, etc.) to look for evidence of specific capabilities before using them.
+
 ### Model Selection Guidelines
 1. **For Coding Tasks**: Use `qwen2.5-coder:1.5b`
 2. **For General Questions**: Use `gemma3:1b`
