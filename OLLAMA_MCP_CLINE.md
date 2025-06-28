@@ -81,6 +81,13 @@ This document details the setup, testing, and performance results of the Ollama 
 - **Example Output**: Comprehensive computer components explanation with proper technical detail
 - **Cline Integration**: Excellent for technical tasks
 
+#### 6. **qwen3:0.6b** - Fast Reasoning Specialist
+- **Response Time**: Fast (< 30 seconds)
+- **Quality**: Good reasoning and conversational responses.
+- **Use Cases**: General chat, simple reasoning tasks, and testing the `think` feature.
+- **Example Output**: Successfully returns both a final answer and a detailed "thinking" block when prompted.
+- **Cline Integration**: Excellent - the best choice for tasks requiring observable reasoning without the long wait times of larger models.
+
 ### ⚠️ Models with Issues
 
 #### Timeout Issues (Model Loading Time)
@@ -113,7 +120,7 @@ Not all models support this feature. Before using the `think` parameter, it is c
 ollama show <model_name> --template
 ```
 
-Look for template sections that reference `$.Think` or similar variables. For example, the `mannix/jan-nano:latest` model includes the following, indicating support:
+Look for template sections that reference `$.Think` or similar variables. For example, the `mannix/jan-nano:latest` and `qwen3:0.6b` models include the following, indicating support:
 
 ```
 {{- if and $.IsThinkSet (eq $i $lastUserIdx) }}
@@ -128,7 +135,7 @@ Look for template sections that reference `$.Think` or similar variables. For ex
 Models like `gemma3:1b` and `qwen2.5-coder:1.5b` do not have this logic in their templates and will ignore the `think` parameter.
 
 ### Known Issues
-- **Timeout with Thinking Models**: Models that support thinking, such as `mannix/jan-nano:latest`, can be very slow to load and may time out, even with extended timeout settings. This is a limitation of the models themselves, not the MCP server.
+- **Timeout with Thinking Models**: Larger models that support thinking, such as `mannix/jan-nano:latest`, can be very slow to load and may time out. For a faster alternative, **`qwen3:0.6b`** is a small model that reliably supports the `think` parameter without significant loading delays.
 
 ## MCP Tools Available
 
