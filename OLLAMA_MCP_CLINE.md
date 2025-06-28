@@ -187,6 +187,7 @@ After starting or restarting the Ollama MCP server, it is recommended to perform
     }
     ```
 3.  **Investigate Model Capabilities**: Do not assume a model supports advanced features like thinking. Use the `show` tool with various flags (`--template`, `--parameters`, etc.) to look for evidence of specific capabilities before using them.
+4.  **Confirm Non-Thinking Mode**: If a model supports thinking, confirm it also works as expected when `think` is set to `false`. This ensures the toggle is fully functional.
 
 ### Model Selection Guidelines
 1. **For Coding Tasks**: Use `qwen2.5-coder:1.5b`
