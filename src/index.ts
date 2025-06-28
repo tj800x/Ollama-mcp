@@ -102,6 +102,15 @@ class OllamaServer {
                 type: 'string',
                 description: 'Name of the model',
               },
+              show_flag: {
+                type: 'string',
+                description: 'Flag to show specific information (license, modelfile, parameters, system, template)',
+                enum: ['license', 'modelfile', 'parameters', 'system', 'template'],
+              },
+              verbose: {
+                type: 'boolean',
+                description: 'Show detailed model information',
+              },
             },
             required: ['name'],
             additionalProperties: false,
@@ -323,7 +332,14 @@ class OllamaServer {
 
   private async handleShow(args: any) {
     try {
-      const { stdout, stderr } = await execAsync(`ollama show ${args.name}`);
+      let command = `ollama show ${args.name}`;
+      if (args.show_flag) {
+        command += ` --${args.show_flag}`;
+      }
+      if (args.verbose) {
+        command += ' --verbose';
+      }
+      const { stdout, stderr } = await execAsync(command);
       return {
         content: [
           {
