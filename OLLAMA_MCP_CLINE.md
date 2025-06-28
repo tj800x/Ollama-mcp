@@ -92,7 +92,7 @@ This document details the setup, testing, and performance results of the Ollama 
 - **Response Time**: Moderate (dependent on `num_predict`)
 - **Quality**: Good reasoning capabilities.
 - **Use Cases**: Reasoning tasks where a limited-length response is acceptable.
-- **Example Output**: Successfully returns a thinking block but may time out without `num_predict`.
+- **Example Output**: Successfully returns a thinking block with `think: true` and a direct answer with `think: false`, but may time out without `num_predict`.
 - **Cline Integration**: Good, but requires using `num_predict` to ensure timely responses.
 
 ### ⚠️ Models with Issues
@@ -216,6 +216,13 @@ After starting or restarting the Ollama MCP server, it is recommended to perform
 
 ### Controlling Output Length
 You can control the maximum number of tokens in a response by using the `num_predict` parameter. This is useful for generating shorter, more concise answers or for preventing overly long responses. Setting `num_predict` to `-1` will generate tokens until the context is full.
+
+### Improved Strategy for Slow Models
+Our testing has revealed an effective strategy for interacting with models that are slow or prone to timeouts:
+
+**Always use `num_predict` when working with a model you are not confident will return a result within the timeout period.**
+
+By setting a reasonable token limit (e.g., `50` or `100`), you can often get a response from a model that would otherwise time out. This is because the timeout can be triggered by long generation times, not just long load times. This technique allows you to successfully use models like `qwen3:1.7b` for both reasoning and direct answers.
 
 ## Usage Examples
 
