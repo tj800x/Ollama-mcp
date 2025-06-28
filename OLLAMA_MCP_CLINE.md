@@ -214,8 +214,12 @@ After starting or restarting the Ollama MCP server, it is recommended to perform
 - **Creative**: 0.7-0.8 (more varied)
 - **Technical**: 0.4-0.6 (balanced)
 
-### Controlling Output Length
-You can control the maximum number of tokens in a response by using the `num_predict` parameter. This is useful for generating shorter, more concise answers or for preventing overly long responses. Setting `num_predict` to `-1` will generate tokens until the context is full.
+### Controlling Output Length (Intelligent Token Limiting)
+You can control the maximum number of tokens in a response by using the `num_predict` parameter. The MCP server enhances this feature with **Intelligent Token Limiting**.
+
+When `num_predict` is used, the server automatically injects a system instruction into the prompt, guiding the model to provide a complete, coherent answer within the specified token limit. The `num_predict` value is also passed to the Ollama API as a hard backstop. This significantly reduces the chance of receiving an abrupt, truncated response.
+
+Setting `num_predict` to `-1` will generate tokens until the context is full, and will not inject any instruction.
 
 ### Improved Strategy for Slow Models
 Our testing has revealed an effective strategy for interacting with models that are slow or prone to timeouts:
